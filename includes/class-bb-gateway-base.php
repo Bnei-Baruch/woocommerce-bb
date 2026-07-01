@@ -15,8 +15,8 @@ abstract class BB_Gateway_Base extends WC_Payment_Gateway {
         return $this->get_setting('organization');
     }
 
-    protected function sku() {
-        return $this->get_setting('sku', 'WOO');
+    protected function defaultSKU() {
+        return $this->get_setting('sku', '');
     }
 
     protected function order_sku(WC_Order $order) {
@@ -29,7 +29,7 @@ abstract class BB_Gateway_Base extends WC_Payment_Gateway {
                 }
             }
         }
-        return $this->sku();
+        return $this->defaultSKU();
     }
 
     protected function generate_user_key() {
@@ -174,9 +174,10 @@ abstract class BB_Gateway_Base extends WC_Payment_Gateway {
                 'default' => 'ben2',
             ],
             'sku' => [
-                'title'   => __('SKU', 'woocommerce-bb'),
-                'type'    => 'text',
-                'default' => 'WOO',
+                'title'       => __('Default SKU', 'woocommerce-bb'),
+                'type'        => 'text',
+                'description' => __('Fallback SKU when product has no SKU set. Required.', 'woocommerce-bb'),
+                'default'     => '',
             ],
         ];
     }
