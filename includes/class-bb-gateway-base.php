@@ -182,6 +182,19 @@ abstract class BB_Gateway_Base extends WC_Payment_Gateway {
         ];
     }
 
+    public function process_admin_options() {
+        $saved = parent::process_admin_options();
+
+        $required = ['api_url' => __('API URL', 'woocommerce-bb'), 'organization' => __('Organization', 'woocommerce-bb'), 'sku' => __('Default SKU', 'woocommerce-bb')];
+        foreach ($required as $key => $label) {
+            if (trim($this->get_option($key)) === '') {
+                WC_Admin_Settings::add_error(sprintf(__('%s is required for %s gateway.', 'woocommerce-bb'), $label, $this->method_title));
+            }
+        }
+
+        return $saved;
+    }
+
     protected function save_user_key(WC_Order $order, $user_key) {
         $order->update_meta_data('_bb_user_key', $user_key);
         $order->save();
