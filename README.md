@@ -19,13 +19,13 @@ WooCommerce payment plugin with two gateways — Pelecard EMV (credit card) and 
 
 ## Configuration
 
-Both gateways share these settings (all required):
+Both gateways share these settings:
 
 | Setting     | Description                                                                               |
 |-------------|-------------------------------------------------------------------------------------------|
 | API URL     | Base URL of the `external_payments` service, e.g. `https://checkout.kbb1.com`            |
 | Organization| Organization code (`ben2` or `meshp18`)                                                   |
-| Default SKU | Fallback SKU sent to Priority ERP when the product has no SKU set. Required.              |
+| Default SKU | Fallback SKU sent to Priority ERP when the product has no SKU set. **Required.**          |
 
 The SKU is taken from the WooCommerce product's own SKU field. The **Default SKU** is only used when the product has no SKU set. Saving the settings with any of these fields empty will show a validation error.
 
