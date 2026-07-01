@@ -19,6 +19,19 @@ abstract class BB_Gateway_Base extends WC_Payment_Gateway {
         return $this->get_setting('sku', 'WOO');
     }
 
+    protected function order_sku(WC_Order $order) {
+        foreach ($order->get_items() as $item) {
+            $product = $item->get_product();
+            if ($product) {
+                $sku = $product->get_sku();
+                if ($sku !== '') {
+                    return $sku;
+                }
+            }
+        }
+        return $this->sku();
+    }
+
     protected function generate_user_key() {
         if (function_exists('wp_generate_uuid4')) {
             return wp_generate_uuid4();
@@ -73,7 +86,7 @@ abstract class BB_Gateway_Base extends WC_Payment_Gateway {
             'City'         => $order->get_billing_city(),
             'Country'      => $order->get_billing_country(),
             'Details'      => sprintf(__('Order #%s', 'woocommerce-bb'), $order->get_order_number()),
-            'SKU'          => $this->sku(),
+            'SKU'          => $this->order_sku($order),
             'VAT'          => 'n',
             'Installments' => 1,
             'Language'     => $this->map_language(),
