@@ -1,0 +1,39 @@
+name: Release
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build zip
+        run: |
+          cd ..
+          zip -r woocommerce-bb/woocommerce-bb.zip woocommerce-bb \
+            --exclude "woocommerce-bb/.git/*" \
+            --exclude "woocommerce-bb/.gitignore" \
+            --exclude "woocommerce-bb/Makefile" \
+            --exclude "woocommerce-bb/.github/*" \
+            --exclude "woocommerce-bb/woocommerce-bb.zip"
+
+      - name: Delete existing latest release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release delete latest --yes --repo ${{ github.repository }} || true
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create latest woocommerce-bb.zip \
+            --repo ${{ github.repository }} \
+            --title "Latest" \
+            --notes "Auto-built from master branch (commit ${{ github.sha }})" \
+            --latest
