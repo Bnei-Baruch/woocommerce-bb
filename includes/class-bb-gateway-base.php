@@ -49,13 +49,21 @@ abstract class BB_Gateway_Base extends WC_Payment_Gateway {
         return $phone ?: '0000000000';
     }
 
-    protected function build_payload(WC_Order $order, $user_key, $endpoint) {
-        $base = $this->base_url();
+    // Return URL handled by this plugin (WC API endpoint).
+    protected function return_url($order_id, $user_key, $action) {
+        return add_query_arg([
+            'action'   => $action,
+            'order_id' => $order_id,
+            'user_key' => $user_key,
+        ], home_url('/?wc-api=' . $this->id . '_return'));
+    }
+
+    protected function build_payload(WC_Order $order, $user_key) {
         return [
             'UserKey'      => $user_key,
-            'GoodURL'      => $base . '/' . $endpoint . '/good?UserKey=' . urlencode($user_key),
-            'ErrorURL'     => $base . '/' . $endpoint . '/error?UserKey=' . urlencode($user_key),
-            'CancelURL'    => $base . '/' . $endpoint . '/cancel?UserKey=' . urlencode($user_key),
+            'GoodURL'      => $this->return_url($order->get_id(), $user_key, 'good'),
+            'ErrorURL'     => $this->return_url($order->get_id(), $user_key, 'error'),
+            'CancelURL'    => $this->return_url($order->get_id(), $user_key, 'cancel'),
             'Name'         => $order->get_formatted_billing_full_name(),
             'Price'        => (float) $order->get_total(),
             'Currency'     => $this->map_currency(get_woocommerce_currency()),
@@ -77,10 +85,10 @@ abstract class BB_Gateway_Base extends WC_Payment_Gateway {
 
     protected function post_to_gateway($url, $payload) {
         $response = wp_remote_post($url, [
-            'headers'     => ['Content-Type' => 'application/json'],
-            'body'        => wp_json_encode($payload),
-            'timeout'     => 30,
-            'sslverify'   => true,
+            'headers'   => ['Content-Type' => 'application/json'],
+            'body'      => wp_json_encode($payload),
+            'timeout'   => 30,
+            'sslverify' => true,
         ]);
 
         if (is_wp_error($response)) {
@@ -98,7 +106,47 @@ abstract class BB_Gateway_Base extends WC_Payment_Gateway {
         return $body['url'];
     }
 
-    // Shared admin fields (api_url, organization, sku) — merged by subclasses.
+    // Handle browser return from external_payments after payment outcome.
+    // Registered via: add_action('woocommerce_api_{id}_return', [$this, 'handle_return'])
+    public function handle_return() {
+        $action   = sanitize_key($_GET['action'] ?? '');
+        $order_id = absint($_GET['order_id'] ?? 0);
+        // transaction_id appended by external_payments on good return (PayPal: transaction_id, EMV: ApprovalNo)
+        $txn_id   = sanitize_text_field($_GET['transaction_id'] ?? $_GET['ApprovalNo'] ?? '');
+
+        $order = $order_id ? wc_get_order($order_id) : null;
+
+        if (!$order) {
+            wc_add_notice(__('Order not found.', 'woocommerce-bb'), 'error');
+            wp_redirect(wc_get_checkout_url());
+            exit;
+        }
+
+        if ($action === 'good') {
+            $order->payment_complete($txn_id ?: null);
+            $order->add_order_note(sprintf(
+                __('Payment completed via %s. Transaction ID: %s', 'woocommerce-bb'),
+                $this->method_title,
+                $txn_id
+            ));
+            wp_redirect($order->get_checkout_order_received_url());
+            exit;
+        }
+
+        if ($action === 'cancel') {
+            $order->update_status('cancelled', __('Customer cancelled payment.', 'woocommerce-bb'));
+            wc_add_notice(__('Payment cancelled.', 'woocommerce-bb'), 'notice');
+            wp_redirect($order->get_cancel_order_url_raw());
+            exit;
+        }
+
+        // error
+        $order->update_status('failed', __('Payment failed.', 'woocommerce-bb'));
+        wc_add_notice(__('Payment failed. Please try again.', 'woocommerce-bb'), 'error');
+        wp_redirect(wc_get_checkout_url());
+        exit;
+    }
+
     protected function shared_form_fields() {
         return [
             'api_url' => [
@@ -120,7 +168,6 @@ abstract class BB_Gateway_Base extends WC_Payment_Gateway {
         ];
     }
 
-    // Store user_key on order so Good/Error/Cancel callbacks can retrieve the order.
     protected function save_user_key(WC_Order $order, $user_key) {
         $order->update_meta_data('_bb_user_key', $user_key);
         $order->save();
