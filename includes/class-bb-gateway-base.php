@@ -169,9 +169,10 @@ abstract class BB_Gateway_Base extends WC_Payment_Gateway {
                 'default'     => 'https://checkout.kbb1.com',
             ],
             'organization' => [
-                'title'   => __('Organization', 'woocommerce-bb'),
-                'type'    => 'text',
-                'default' => 'ben2',
+                'title'       => __('Organization', 'woocommerce-bb'),
+                'type'        => 'text',
+                'description' => __('Required. Organization code (e.g. ben2 or meshp18).', 'woocommerce-bb'),
+                'default'     => 'ben2',
             ],
             'sku' => [
                 'title'       => __('Default SKU', 'woocommerce-bb'),
@@ -185,7 +186,7 @@ abstract class BB_Gateway_Base extends WC_Payment_Gateway {
     public function process_admin_options() {
         $saved = parent::process_admin_options();
 
-        $required = ['api_url' => __('API URL', 'woocommerce-bb'), 'sku' => __('Default SKU', 'woocommerce-bb')];
+        $required = ['api_url' => __('API URL', 'woocommerce-bb'), 'organization' => __('Organization', 'woocommerce-bb'), 'sku' => __('Default SKU', 'woocommerce-bb')];
         foreach ($required as $key => $label) {
             if (trim($this->get_option($key)) === '') {
                 WC_Admin_Settings::add_error(sprintf(__('%s is required for %s gateway.', 'woocommerce-bb'), $label, $this->method_title));
