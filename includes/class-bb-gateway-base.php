@@ -90,7 +90,7 @@ abstract class BB_Gateway_Base extends WC_Payment_Gateway {
             'VAT'          => 'n',
             'Installments' => 1,
             'Language'     => $this->map_language(),
-            'Reference'    => (string) $order->get_order_number(),
+            'Reference'    => $this->get_setting('reference_prefix') . $order->get_order_number(),
             'Organization' => $this->org(),
             'IsVisual'     => false,
         ];
@@ -178,6 +178,12 @@ abstract class BB_Gateway_Base extends WC_Payment_Gateway {
                 'title'       => __('Default SKU', 'woocommerce-bb'),
                 'type'        => 'text',
                 'description' => __('Fallback SKU when product has no SKU set. Required.', 'woocommerce-bb'),
+                'default'     => '',
+            ],
+            'reference_prefix' => [
+                'title'       => __('Prefix for order reference', 'woocommerce-bb'),
+                'type'        => 'text',
+                'description' => __('Optional prefix prepended to the order number sent as ParamX (max 19 chars total).', 'woocommerce-bb'),
                 'default'     => '',
             ],
         ];
