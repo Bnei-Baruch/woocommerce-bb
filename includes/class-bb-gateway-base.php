@@ -71,7 +71,22 @@ abstract class BB_Gateway_Base extends WC_Payment_Gateway {
         ], home_url('/?wc-api=' . $this->id . '_return'));
     }
 
+    protected function order_has_category($order_id, $slug) {
+        $order = wc_get_order($order_id);
+        if (!$order) {
+            return false;
+        }
+        foreach ($order->get_items() as $item) {
+            $product = $item->get_product();
+            if ($product && has_term($slug, 'product_cat', $product->get_id())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     protected function build_payload(WC_Order $order, $user_key) {
+        $is_donation = $this->order_has_category($order->get_id(), 'donation');
         return [
             'UserKey'      => $user_key,
             'GoodURL'      => $this->return_url($order->get_id(), $user_key, 'good'),
@@ -87,7 +102,7 @@ abstract class BB_Gateway_Base extends WC_Payment_Gateway {
             'Country'      => $order->get_billing_country(),
             'Details'      => sprintf(__('Order #%s', 'woocommerce-bb'), $order->get_order_number()),
             'SKU'          => $this->order_sku($order),
-            'VAT'          => 'n',
+            'VAT'          => $is_donation ? 'Y' : 'N',
             'Installments' => 1,
             'Language'     => $this->map_language(),
             'Reference'    => $this->get_setting('reference_prefix') . $order->get_order_number(),
