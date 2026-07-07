@@ -151,6 +151,13 @@ class BB_Gateway_EMV extends BB_Gateway_Base {
         $token        = $parent_order ? $parent_order->get_meta('_bb_token') : '';
         $auth_no      = $parent_order ? $parent_order->get_meta('_bb_auth_no') : '';
 
+        // Fallback: old pelecard plugin stored token in _transaction_data
+        if (!$token && $parent_order) {
+            $tx_data = $parent_order->get_meta('_transaction_data');
+            $token   = $tx_data['Token'] ?? '';
+            $auth_no = $tx_data['DebitApproveNumber'] ?? '';
+        }
+
         if (!$token) {
             $order->update_status('failed', __('Subscription renewal: no payment token found.', 'woocommerce-bb'));
             return;
