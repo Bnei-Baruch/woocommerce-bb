@@ -48,14 +48,7 @@ class BB_Gateway_EMV extends BB_Gateway_Base {
                 'type'    => 'textarea',
                 'default' => '',
             ],
-        ], $this->shared_form_fields(), [
-            'hook_terminal' => [
-                'title'       => __('Recurring terminal number', 'woocommerce-bb'),
-                'type'        => 'text',
-                'description' => __('Pelecard terminal used for subscription renewal charges (PELECARD_RECURR_TERMINAL on server). Leave blank to use main terminal.', 'woocommerce-bb'),
-                'default'     => '',
-            ],
-        ]);
+        ], $this->shared_form_fields());
     }
 
     public function process_payment($order_id) {
