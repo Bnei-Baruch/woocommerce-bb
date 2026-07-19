@@ -37,22 +37,15 @@ function bb_migrate_subscription_payment_methods() {
         return;
     }
 
-    $map = [
-        'pelecard' => 'bb_emv',
-        'paypal'   => 'bb_paypal',
-    ];
+    $subscriptions = wcs_get_subscriptions([
+        'subscription_status'    => ['active', 'on-hold'],
+        'payment_method'         => 'pelecard',
+        'subscriptions_per_page' => -1,
+    ]);
 
-    foreach ($map as $old_method => $new_method) {
-        $subscriptions = wcs_get_subscriptions([
-            'subscription_status'    => ['active', 'on-hold'],
-            'payment_method'         => $old_method,
-            'subscriptions_per_page' => -1,
-        ]);
-
-        foreach ($subscriptions as $subscription) {
-            $subscription->set_payment_method($new_method);
-            $subscription->save();
-        }
+    foreach ($subscriptions as $subscription) {
+        $subscription->set_payment_method('bb_emv');
+        $subscription->save();
     }
 
     update_option('bb_subscription_migration_done', true);

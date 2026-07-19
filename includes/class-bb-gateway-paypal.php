@@ -130,13 +130,7 @@ class BB_Gateway_PayPal extends BB_Gateway_Base {
 
         $parent_order = wc_get_order($parent_order_id);
 
-        // New vault token (bb_paypal subscriptions)
         $token = $parent_order ? $parent_order->get_meta('_bb_paypal_vault_token') : '';
-
-        // Fallback: old WooCommerce PayPal Standard billing agreement
-        if (!$token && $parent_order) {
-            $token = $parent_order->get_meta('_paypal_subscription_id');
-        }
 
         if (!$token) {
             $order->update_status('failed', __('Subscription renewal: no PayPal token found.', 'woocommerce-bb'));
