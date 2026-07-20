@@ -62,16 +62,6 @@ class BB_Gateway_EMV extends BB_Gateway_Base {
             $payload['CreateToken'] = 'True';
         }
 
-        $is_donation = $payload['VAT'] === 'Y';
-        $debug = sprintf(
-            'DEBUG: VAT=%s | QAME_WTAXNUMEXPL=%s | QAMS_VATNUM=%s',
-            $payload['VAT'],
-            $is_donation ? var_export($order->get_meta('tax_customer_type'), true) : 'n/a',
-            $is_donation ? var_export($order->get_meta('tax_id_code'), true) : 'n/a'
-        );
-        wc_add_notice($debug, 'error');
-        return ['result' => 'fail'];
-
         try {
             $redirect_url = $this->post_to_gateway($this->base_url() . '/emv/new', $payload);
         } catch (Exception $e) {
