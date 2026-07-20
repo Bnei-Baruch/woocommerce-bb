@@ -66,11 +66,12 @@ class BB_Gateway_EMV extends BB_Gateway_Base {
                 $debug_items[] = 'item: no product';
                 continue;
             }
-            $terms = get_the_terms($product->get_id(), 'product_cat');
+            $lookup_id = $product->is_type('variation') ? $product->get_parent_id() : $product->get_id();
+            $terms = get_the_terms($lookup_id, 'product_cat');
             $term_info = $terms && !is_wp_error($terms)
                 ? array_map(fn($t) => "slug={$t->slug} name={$t->name}", $terms)
                 : ['(none)'];
-            $debug_items[] = 'product_id=' . $product->get_id() . ' type=' . $product->get_type() . ' terms=[' . implode(', ', $term_info) . ']';
+            $debug_items[] = 'product_id=' . $product->get_id() . ' lookup_id=' . $lookup_id . ' type=' . $product->get_type() . ' terms=[' . implode(', ', $term_info) . ']';
         }
         $debug = 'VAT=' . $payload['VAT'] . ' | ' . implode(' | ', $debug_items);
         wc_add_notice('DEBUG: ' . $debug, 'error');
