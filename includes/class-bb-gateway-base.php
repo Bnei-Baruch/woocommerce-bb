@@ -78,7 +78,7 @@ abstract class BB_Gateway_Base extends WC_Payment_Gateway {
         }
         foreach ($order->get_items() as $item) {
             $product = $item->get_product();
-            if ($product && has_term($slug, 'product_cat', $product->get_id())) {
+            if ($product && has_term([strtolower($slug), ucfirst($slug)], 'product_cat', $product->get_id())) {
                 return true;
             }
         }
