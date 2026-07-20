@@ -80,20 +80,13 @@ abstract class BB_Gateway_Base extends WC_Payment_Gateway {
         foreach ($order->get_items() as $item) {
             $product = $item->get_product();
             if (!$product) {
-                wc_get_logger()->debug('order_has_category: item has no product', ['source' => 'bb-gateway']);
                 continue;
             }
             $lookup_id = $product->is_type('variation') ? $product->get_parent_id() : $product->get_id();
             $terms = get_the_terms($lookup_id, 'product_cat');
             if (!$terms || is_wp_error($terms)) {
-                wc_get_logger()->debug('order_has_category: product ' . $product->get_id() . ' (lookup ' . $lookup_id . ') has no product_cat terms (or WP_Error)', ['source' => 'bb-gateway']);
                 continue;
             }
-            $term_info = array_map(fn($t) => "slug={$t->slug} name={$t->name}", $terms);
-            wc_get_logger()->debug(
-                'order_has_category: product ' . $product->get_id() . ' (lookup ' . $lookup_id . ') terms: ' . implode(', ', $term_info) . ' | looking for: ' . $slug_lower,
-                ['source' => 'bb-gateway']
-            );
             foreach ($terms as $term) {
                 if (strtolower($term->slug) === $slug_lower || strtolower($term->name) === $slug_lower) {
                     return true;

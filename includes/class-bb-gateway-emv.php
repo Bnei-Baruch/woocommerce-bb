@@ -58,24 +58,21 @@ class BB_Gateway_EMV extends BB_Gateway_Base {
 
         $payload = $this->build_payload($order, $user_key);
 
-        // DEBUG: dump payload and category info, do not redirect
-        $debug_items = [];
-        foreach ($order->get_items() as $item) {
-            $product = $item->get_product();
-            if (!$product) {
-                $debug_items[] = 'item: no product';
-                continue;
-            }
-            $lookup_id = $product->is_type('variation') ? $product->get_parent_id() : $product->get_id();
-            $terms = get_the_terms($lookup_id, 'product_cat');
-            $term_info = $terms && !is_wp_error($terms)
-                ? array_map(fn($t) => "slug={$t->slug} name={$t->name}", $terms)
-                : ['(none)'];
-            $debug_items[] = 'product_id=' . $product->get_id() . ' lookup_id=' . $lookup_id . ' type=' . $product->get_type() . ' terms=[' . implode(', ', $term_info) . ']';
+        if (function_exists('wcs_order_contains_subscription') && wcs_order_contains_subscription($order)) {
+            $payload['CreateToken'] = 'True';
         }
-        $debug = 'VAT=' . $payload['VAT'] . ' | ' . implode(' | ', $debug_items);
-        wc_add_notice('DEBUG: ' . $debug, 'error');
-        return ['result' => 'fail'];
+
+        try {
+            $redirect_url = $this->post_to_gateway($this->base_url() . '/emv/new', $payload);
+        } catch (Exception $e) {
+            wc_add_notice(__('Payment error: ', 'woocommerce-bb') . $e->getMessage(), 'error');
+            return ['result' => 'fail'];
+        }
+
+        return [
+            'result'   => 'success',
+            'redirect' => $redirect_url,
+        ];
     }
 
     public function handle_return() {
