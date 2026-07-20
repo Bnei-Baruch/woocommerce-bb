@@ -76,10 +76,20 @@ abstract class BB_Gateway_Base extends WC_Payment_Gateway {
         if (!$order) {
             return false;
         }
+        $slug_lower = strtolower($slug);
         foreach ($order->get_items() as $item) {
             $product = $item->get_product();
-            if ($product && has_term([strtolower($slug), ucfirst($slug)], 'product_cat', $product->get_id())) {
-                return true;
+            if (!$product) {
+                continue;
+            }
+            $terms = get_the_terms($product->get_id(), 'product_cat');
+            if (!$terms || is_wp_error($terms)) {
+                continue;
+            }
+            foreach ($terms as $term) {
+                if (strtolower($term->slug) === $slug_lower || strtolower($term->name) === $slug_lower) {
+                    return true;
+                }
             }
         }
         return false;
