@@ -80,12 +80,16 @@ abstract class BB_Gateway_Base extends WC_Payment_Gateway {
         foreach ($order->get_items() as $item) {
             $product = $item->get_product();
             if (!$product) {
+                error_log('[BB] order_has_category: item has no product');
                 continue;
             }
             $terms = get_the_terms($product->get_id(), 'product_cat');
             if (!$terms || is_wp_error($terms)) {
+                error_log('[BB] order_has_category: product ' . $product->get_id() . ' has no product_cat terms (or WP_Error)');
                 continue;
             }
+            $term_info = array_map(fn($t) => "slug={$t->slug} name={$t->name}", $terms);
+            error_log('[BB] order_has_category: product ' . $product->get_id() . ' terms: ' . implode(', ', $term_info) . ' | looking for: ' . $slug_lower);
             foreach ($terms as $term) {
                 if (strtolower($term->slug) === $slug_lower || strtolower($term->name) === $slug_lower) {
                     return true;
