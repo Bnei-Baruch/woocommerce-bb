@@ -165,6 +165,8 @@ class BB_Gateway_PayPal extends BB_Gateway_Base {
             'IsVisual'     => false,
             'Token'        => $token,
             'IsRecurring'  => true,
+            'TaxType'      => $is_donation ? (string) $parent_order->get_meta('tax_customer_type') : '',
+            'TaxId'        => $is_donation ? (string) $parent_order->get_meta('tax_id_code') : '',
         ];
 
         $response = wp_remote_post($this->base_url() . '/paypal/charge', [
