@@ -233,6 +233,9 @@ class BB_Gateway_EMV extends BB_Gateway_Base {
         foreach ($existing as $t) {
             if ($t->get_last4() === $last4) {
                 $t->set_token($token);
+                $t->set_expiry_month($exp_month);
+                $t->set_expiry_year($exp_year);
+                $t->set_card_type($card_types[$brand] ?? 'credit');
                 $t->save();
                 return;
             }
