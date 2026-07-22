@@ -171,7 +171,7 @@ class BB_Gateway_EMV extends BB_Gateway_Base {
             'Currency'     => $this->map_currency(get_woocommerce_currency()),
             'Email'        => $order->get_billing_email(),
             'Phone'        => $this->order_phone($order),
-            'Street'       => $order->get_billing_address_1(),
+            'Street'       => '',
             'City'         => '',
             'Country'      => $order->get_billing_country(),
             'Details'      => $this->order_details($order),
