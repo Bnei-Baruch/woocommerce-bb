@@ -153,7 +153,7 @@ class BB_Gateway_PayPal extends BB_Gateway_Base {
             'Email'        => $order->get_billing_email(),
             'Phone'        => $this->order_phone($order),
             'Street'       => $order->get_billing_address_1(),
-            'City'         => $order->get_billing_city(),
+            'City'         => '',
             'Country'      => $order->get_billing_country(),
             'Details'      => $this->order_details($order),
             'SKU'          => $this->order_sku($order),
