@@ -58,6 +58,13 @@ class BB_Gateway_PayPal extends BB_Gateway_Base {
 
         $payload = $this->build_payload($order, $user_key);
 
+        $names = [];
+        foreach ($order->get_items() as $item) {
+            $names[] = $item->get_name();
+        }
+        wc_add_notice('DEBUG names: ' . var_export($names, true), 'error');
+        return ['result' => 'fail'];
+
         if (function_exists('wcs_order_contains_subscription') && wcs_order_contains_subscription($order)) {
             $payload['IsRecurring'] = true;
         }
