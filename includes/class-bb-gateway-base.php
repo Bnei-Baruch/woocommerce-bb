@@ -71,6 +71,15 @@ abstract class BB_Gateway_Base extends WC_Payment_Gateway {
         ], home_url('/?wc-api=' . $this->id . '_return'));
     }
 
+    protected function order_details(WC_Order $order) {
+        $names = [];
+        foreach ($order->get_items() as $item) {
+            $names[] = $item->get_name();
+        }
+        $names = array_filter($names);
+        return $names ? implode(', ', $names) : sprintf(__('Order #%s', 'woocommerce-bb'), $order->get_order_number());
+    }
+
     protected function order_has_category($order_id, $slug) {
         $order = wc_get_order($order_id);
         if (!$order) {
@@ -111,7 +120,7 @@ abstract class BB_Gateway_Base extends WC_Payment_Gateway {
             'Street'       => $order->get_billing_address_1(),
             'City'         => $order->get_billing_city(),
             'Country'      => $order->get_billing_country(),
-            'Details'      => sprintf(__('Order #%s', 'woocommerce-bb'), $order->get_order_number()),
+            'Details'      => $this->order_details($order),
             'SKU'          => $this->order_sku($order),
             'VAT'          => $is_donation ? 'Y' : 'N',
             'TaxType' => $is_donation ? (string) $order->get_meta('tax_customer_type') : '',

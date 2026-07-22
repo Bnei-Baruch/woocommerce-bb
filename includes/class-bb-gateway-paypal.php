@@ -58,14 +58,6 @@ class BB_Gateway_PayPal extends BB_Gateway_Base {
 
         $payload = $this->build_payload($order, $user_key);
 
-        $names = [];
-        foreach ($order->get_items() as $item) {
-            $names[] = $item->get_name();
-        }
-        $details = $names ? implode(', ', $names) : sprintf(__('Order #%s', 'woocommerce-bb'), $order->get_order_number());
-        wc_add_notice('DEBUG names: ' . var_export($names, true) . ' | bool: ' . ($names ? 'truthy' : 'blank') . ' | details: ' . $details, 'error');
-        return ['result' => 'fail'];
-
         if (function_exists('wcs_order_contains_subscription') && wcs_order_contains_subscription($order)) {
             $payload['IsRecurring'] = true;
         }
@@ -163,7 +155,7 @@ class BB_Gateway_PayPal extends BB_Gateway_Base {
             'Street'       => $order->get_billing_address_1(),
             'City'         => $order->get_billing_city(),
             'Country'      => $order->get_billing_country(),
-            'Details'      => sprintf(__('Order #%s', 'woocommerce-bb'), $order->get_order_number()),
+            'Details'      => $this->order_details($order),
             'SKU'          => $this->order_sku($order),
             'VAT'          => $is_donation ? 'Y' : 'N',
             'Installments' => 1,

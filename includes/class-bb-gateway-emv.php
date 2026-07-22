@@ -174,7 +174,7 @@ class BB_Gateway_EMV extends BB_Gateway_Base {
             'Street'       => $order->get_billing_address_1(),
             'City'         => $order->get_billing_city(),
             'Country'      => $order->get_billing_country(),
-            'Details'      => sprintf(__('Order #%s', 'woocommerce-bb'), $order->get_order_number()),
+            'Details'      => $this->order_details($order),
             'SKU'          => $this->order_sku($order),
             'VAT'              => $is_donation ? 'Y' : 'N',
             'TaxType' => $is_donation ? (string) $order->get_meta('tax_customer_type') : '',
