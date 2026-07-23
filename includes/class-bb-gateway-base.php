@@ -130,6 +130,7 @@ abstract class BB_Gateway_Base extends WC_Payment_Gateway {
             'Reference'    => $this->get_setting('reference_prefix') . $order->get_order_number(),
             'Organization' => $this->org(),
             'IsVisual'     => false,
+            'PluginVersion' => defined('BB_PAYMENTS_VERSION') ? BB_PAYMENTS_VERSION : '',
         ];
     }
 

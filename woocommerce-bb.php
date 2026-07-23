@@ -3,7 +3,7 @@
  * Plugin Name: BB Payment Gateways
  * Plugin URI:  https://github.com/Bnei-Baruch/woocommerce-bb
  * Description: Bnei Baruch payment gateways: Pelecard EMV and PayPal via external_payments service.
- * Version:     1.0.0
+ * Version:     1.0.1
  * Author:      Bnei Baruch
  * Text Domain: woocommerce-bb
  * Domain Path: /languages
@@ -12,6 +12,8 @@
  */
 
 defined('ABSPATH') || exit;
+
+define('BB_PAYMENTS_VERSION', '1.0.1');
 
 add_action('plugins_loaded', 'bb_payments_init', 11);
 add_action('admin_init', 'bb_migrate_subscription_payment_methods');

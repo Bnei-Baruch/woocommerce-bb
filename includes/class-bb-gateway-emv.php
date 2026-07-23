@@ -187,6 +187,7 @@ class BB_Gateway_EMV extends BB_Gateway_Base {
             'Token'        => $token,
             'ApprovalNo'   => $auth_no,
             'IsRecurring'  => true,
+            'PluginVersion' => defined('BB_PAYMENTS_VERSION') ? BB_PAYMENTS_VERSION : '',
         ];
 
         $response = wp_remote_post($this->base_url() . '/emv/charge', [
